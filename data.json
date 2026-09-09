@@ -47,6 +47,12 @@
    "name": "LAST STOP // SALE + BROKERS",
    "color": "#ff3d81",
    "note": "LG CCPA/CPRA disclosure: may sell or share categories of Personal Information with advertising partners or business & marketing partners. LG Ad Solutions: combines data with third-party data providers; product is addressable audiences for advertisers - the exit to the data-broker/ad ecosystem."
+  },
+  {
+   "id": "z-buyers",
+   "name": "BUYER PIPELINE // DSP + BRANDS",
+   "color": "#ff9f43",
+   "note": "Where LG Channels + ACR audiences are sold: programmatic pipes (Amazon Publisher Services -> Amazon DSP), advertisers/agencies, and inbound data providers. The buyer side of the LG Ad Solutions graph."
   }
  ],
  "services": [
@@ -60,7 +66,8 @@
     "on-device webOS (luna/palm services, developer mode documented by LG webOS dev portal)"
    ],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-tv-scan",
@@ -70,7 +77,8 @@
    "note": "Reported: scans LAN for phones/smartwatches/PCs/printers/switches/smart-home; collects internal IPs, neighbouring Wi-Fi SSIDs + signal + location. Feeds the 'addressable secondary devices' pool (363-386M US) used for ad targeting.",
    "endpoints": [],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-tv-audio",
@@ -80,7 +88,8 @@
    "note": "Reported: clean mic audio captured while screen off; buffered locally while offline; uploaded to LG servers after network restored. LG: voice data only with consent; no comment on investigation as of 2026-09-09.",
    "endpoints": [],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-tv-acr",
@@ -90,7 +99,8 @@
    "note": "Fingerprints on-screen audio/video across HDMI/streaming inputs for content identification. Consent surfaces: 'Viewing Information' / 'Live Plus'. Data accessible to LG and service partner Alphonso Inc per the TV agreement.",
    "endpoints": [],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-sdp-root",
@@ -103,7 +113,8 @@
     "NS secns.lg.co.kr",
     "NS prmns.lg.co.kr"
    ],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-sdp-aic",
@@ -116,7 +127,8 @@
     "52.27.197.56",
     "35.81.237.210"
    ],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-sdp-kic",
@@ -129,7 +141,8 @@
     "54.116.204.19",
     "54.116.244.83"
    ],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-cdp",
@@ -143,7 +156,8 @@
     "cdpes.lgtvcommon.com"
    ],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-usage",
@@ -155,7 +169,8 @@
     "usage-pattern-profile.lgtvcommon.com"
    ],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-adsvc",
@@ -174,7 +189,8 @@
     "10.154.17.177",
     "10.154.4.240"
    ],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-channels",
@@ -192,7 +208,8 @@
     "3.38.65.89",
     "13.124.94.184"
    ],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-nvoice",
@@ -204,7 +221,8 @@
     "netflixvoice.lgtvcommon.com"
    ],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-wise",
@@ -218,7 +236,8 @@
     "wiseadmin.lgtvcommon.com"
    ],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-appstv",
@@ -232,7 +251,8 @@
     "vodstreaming.lgappstv.com"
    ],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-tvterms",
@@ -244,7 +264,8 @@
     "https://us.lgappstv.com/main/terms"
    ],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-alphonso",
@@ -254,7 +275,8 @@
    "note": "TV Viewing Information agreement grants LG and service partner Alphonso Inc access to watched content across streaming services + play activity (pocket-lint 2026-05). LG acquired Alphonso 2021 -> LG Ad Solutions.",
    "endpoints": [],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-gracenote",
@@ -268,7 +290,8 @@
     "onconnect.video.gracenote.com"
    ],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-lgads",
@@ -285,7 +308,8 @@
     "141.193.213.10",
     "141.193.213.11"
    ],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-aas",
@@ -299,7 +323,8 @@
     "cdn-tvos.alphonso.tv"
    ],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-segments",
@@ -315,7 +340,8 @@
    "dns": [
     "209.240.97.236"
    ],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-smartad",
@@ -330,7 +356,8 @@
    "dns": [
     "203.247.138.53"
    ],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-netflix",
@@ -340,7 +367,8 @@
    "note": "netflixvoice.lgtvcommon.com bridge; Netflix app + voice search on webOS. Standard smart-TV app partner.",
    "endpoints": [],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-google",
@@ -350,7 +378,8 @@
    "note": "Google Assistant on LG TVs (voice); Google ad-tech appears via LG privacy 'third-party advertising partners' interest-based ads language.",
    "endpoints": [],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-amazon",
@@ -360,7 +389,8 @@
    "note": "Alexa built-in on LG TVs; voice requests route to Amazon when enabled.",
    "endpoints": [],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-dataprov",
@@ -370,7 +400,8 @@
    "note": "LG Ad Solutions privacy policy: receives demographic/interests etc. from third-party data providers and combines with own data. LG Global privacy: collects from marketing companies and data brokers.",
    "endpoints": [],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-adpartners",
@@ -380,7 +411,8 @@
    "note": "LG US disclosure: may sell/share PI categories with advertising partners for interest-based advertising across online services.",
    "endpoints": [],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-bizpartners",
@@ -390,7 +422,8 @@
    "note": "LG US disclosure: business/marketing partners recipient category for sold/shared data.",
    "endpoints": [],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-sale",
@@ -402,7 +435,8 @@
     "https://privacy.us.lg.com/policies"
    ],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
   },
   {
    "id": "s-brokers",
@@ -412,7 +446,57 @@
    "note": "LG Global privacy acknowledges collecting from data brokers (inbound). The outbound product is addressable audiences + ACR viewing graphs sold into CTV ad ecosystem; brokers/resellers are the terminal. GPC/opt-out + 'Do Not Sell or Share My Personal Information' available.",
    "endpoints": [],
    "dns": [],
-   "keys": []
+   "keys": [],
+   "cert": null
+  },
+  {
+   "id": "s-amazon-dsp",
+   "name": "Amazon Publisher Services / Amazon DSP",
+   "zone": "z-buyers",
+   "role": "PROGRAMMATIC BUY PIPE (NAMED)",
+   "note": "LG Ad Solutions PR 2025-04-08: LG Channels inventory available through Amazon Publisher Direct on Amazon DSP. Named pipe from LG's ad estate into Amazon's buy side.",
+   "endpoints": [
+    "https://lgads.tv/press_release/lg-ad-solutions-extends-programmatic-buying-opportunities-on-lg-channels-via-amazon-publisher-direct-available-on-amazon-dsp/"
+   ],
+   "dns": [],
+   "keys": [],
+   "cert": null
+  },
+  {
+   "id": "s-advertisers",
+   "name": "Advertisers / agencies",
+   "zone": "z-buyers",
+   "role": "BUYERS (CATEGORY)",
+   "note": "Alphonso/LG Ad Solutions privacy: shares data with select third parties for their own business purposes incl. ad targeting and measurement, with third parties for direct marketing, and for reporting/analytics. Sale classes per LG CCPA disclosure.",
+   "endpoints": [],
+   "dns": [],
+   "keys": [],
+   "cert": null
+  },
+  {
+   "id": "s-choice",
+   "name": "choice.alphonso.tv",
+   "zone": "z-ads",
+   "role": "PRIVACY CONTROL PLANE (DONOTSELL + CCPA)",
+   "note": "Do Not Sell My Personal Information + other CCPA requests portal operated by Alphonso Inc for the LG Ad Solutions service.",
+   "endpoints": [
+    "https://choice.alphonso.tv/donotsell",
+    "https://choice.alphonso.tv/otherccparequests"
+   ],
+   "dns": [],
+   "keys": [],
+   "cert": null
+  },
+  {
+   "id": "s-lgads-legal",
+   "name": "Alphonso Inc (legal entity)",
+   "zone": "z-ads",
+   "role": "ENTITY - LG AD SOLUTIONS = ALPHONSO INC",
+   "note": "lgads.tv: 'LG Ad Solutions, incorporated as Alphonso Inc.' Site privacy policy is Alphonso Inc's. 2026-01: Alphonso founders sue LG for up to $4.5B (AdExchanger) - post-acquisition dispute over the ACR business.",
+   "endpoints": [],
+   "dns": [],
+   "keys": [],
+   "cert": null
   }
  ],
  "links": [
@@ -567,6 +651,39 @@
   [
    "s-google",
    "s-adpartners"
+  ],
+  [
+   "s-lgads",
+   "s-lgads-legal"
+  ],
+  [
+   "s-lgads-legal",
+   "s-choice"
+  ],
+  [
+   "s-segments",
+   "s-amazon-dsp"
+  ],
+  [
+   "s-aas",
+   "s-amazon-dsp"
+  ],
+  [
+   "s-channels",
+   "s-amazon-dsp"
+  ],
+  [
+   "s-amazon-dsp",
+   "s-advertisers"
+  ],
+  [
+   "s-adpartners",
+   "s-advertisers"
+  ],
+  [
+   "s-advertisers",
+   "s-sale"
   ]
- ]
+ ],
+ "ipPools": []
 }
