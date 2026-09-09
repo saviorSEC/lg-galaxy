@@ -53,6 +53,12 @@
    "name": "BUYER PIPELINE // DSP + BRANDS",
    "color": "#ff9f43",
    "note": "Where LG Channels + ACR audiences are sold: programmatic pipes (Amazon Publisher Services -> Amazon DSP), advertisers/agencies, and inbound data providers. The buyer side of the LG Ad Solutions graph."
+  },
+  {
+   "id": "z-hub",
+   "name": "WEBOS HUB // LICENSED BRANDS",
+   "color": "#4ade80",
+   "note": "webOS Hub = LG's licensed platform for non-LG TV/monitor brands. 700+ global brands, 10M+ units sold in 4 years (webos-hub.com). Hub devices run LG's OS, app store, LG Channels and LG data plane - LG data practices on third-party hardware. Apple TV/Music/AirPlay/HomeKit in 100+ countries."
   }
  ],
  "services": [
@@ -615,6 +621,54 @@
    "dns": [],
    "keys": [],
    "cert": null
+  },
+  {
+   "id": "s-hub-platform",
+   "name": "webOS Hub platform",
+   "zone": "z-hub",
+   "role": "LICENSED OS - 700+ BRANDS / 10M+ UNITS",
+   "note": "webos-hub.com: 'trusted platform of choice for over 700 global brands, cumulative sales exceeding 10 million units in just four years.' Hub 3.0 (2025-06-13) + 2.0S. Smart TV + Smart Monitor lines.",
+   "endpoints": [
+    "https://webos-hub.com/"
+   ],
+   "dns": [],
+   "keys": [],
+   "cert": null
+  },
+  {
+   "id": "s-hub-channels",
+   "name": "LG Channels on Hub",
+   "zone": "z-hub",
+   "role": "FAST + ADS ON LICENSED HARDWARE",
+   "note": "Hub TVs ship LG Channels + LG Ad Solutions inventory - same ad/data stack as LG-branded sets, on third-party badges.",
+   "endpoints": [],
+   "dns": [],
+   "keys": [],
+   "cert": null
+  },
+  {
+   "id": "s-hub-apple",
+   "name": "Apple ecosystem via Hub",
+   "zone": "z-hub",
+   "role": "APPLE TV / MUSIC / AIRPLAY / HOMEKIT",
+   "note": "Apple TV app, Apple Music, AirPlay, HomeKit in 100+ countries via webOS Hub (LG newsroom newsSeq=15).",
+   "endpoints": [],
+   "dns": [],
+   "keys": [],
+   "cert": null
+  },
+  {
+   "id": "s-lgaccount",
+   "name": "LG Account (us.m.lgaccount.com)",
+   "zone": "z-common",
+   "role": "IDENTITY + CONSENT",
+   "note": "Referenced in LG US privacy center (us.m.lgaccount.com/customer/terms). Account sign-in used for identity verification + cross-service combination; consent surface.",
+   "endpoints": [
+    "https://us.m.lgaccount.com/customer/terms"
+   ],
+   "dns": [],
+   "keys": [],
+   "cert": null
   }
  ],
  "links": [
@@ -1081,6 +1135,42 @@
   [
    "s-innovid",
    "s-netflix"
+  ],
+  [
+   "s-hub-platform",
+   "s-tv-webos"
+  ],
+  [
+   "s-hub-platform",
+   "s-hub-channels"
+  ],
+  [
+   "s-hub-platform",
+   "s-hub-apple"
+  ],
+  [
+   "s-hub-channels",
+   "z-common"
+  ],
+  [
+   "s-hub-channels",
+   "s-channels"
+  ],
+  [
+   "s-hub-channels",
+   "s-amazon-dsp"
+  ],
+  [
+   "s-hub-channels",
+   "s-alphonso"
+  ],
+  [
+   "s-lgaccount",
+   "s-tv-webos"
+  ],
+  [
+   "s-lgaccount",
+   "s-tvterms"
   ]
  ],
  "ipPools": []
