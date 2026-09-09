@@ -602,6 +602,19 @@
    "dns": [],
    "keys": [],
    "cert": null
+  },
+  {
+   "id": "s-innovid",
+   "name": "Innovid (Harmony)",
+   "zone": "z-buyers",
+   "role": "MEASUREMENT / ATTRIBUTION PIPE (SEC-DOCUMENTED)",
+   "note": "Innovid 8-K 2024-11-12: 'LG Ad Solutions is the latest industry leader to join Innovid's Harmony initiative.' Innovid also does impression verification for Netflix's ad-supported tier. Named measurement/attribution pipe out of the LG data plane.",
+   "endpoints": [
+    "https://www.sec.gov/Archives/edgar/data/1835378/000183537824000124/a2024-q3exhibit991.htm"
+   ],
+   "dns": [],
+   "keys": [],
+   "cert": null
   }
  ],
  "links": [
@@ -1056,6 +1069,18 @@
   [
    "z-partners",
    "z-exit"
+  ],
+  [
+   "s-lgads-legal",
+   "s-innovid"
+  ],
+  [
+   "s-innovid",
+   "s-advertisers"
+  ],
+  [
+   "s-innovid",
+   "s-netflix"
   ]
  ],
  "ipPools": []
