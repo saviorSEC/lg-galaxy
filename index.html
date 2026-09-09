@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LG GALAXY — webOS TV Data Plane · ACR · Ad-Tech · Where the Data Goes</title>
+<style>
+:root{
+  --bg:#05060a; --panel:#0b0e16; --ink:#dbe4ff; --muted:#7a86a8;
+  --rule:#1c2333; --accent:#00e5ff; --accent2:#ff3d81; --glow:rgba(0,229,255,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:ui-monospace,"Cascadia Mono",Menlo,monospace;overflow:hidden;height:100vh}
+#app{position:relative;height:100vh;width:100vw}
+canvas#galaxy{position:absolute;inset:0;display:block;cursor:grab}
+canvas#galaxy.drag{cursor:grabbing}
+/* HUD */
+#hud{position:absolute;top:14px;left:14px;z-index:10;background:rgba(11,14,22,.85);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;max-width:300px;backdrop-filter:blur(6px)}
+#hud h1{font-size:15px;letter-spacing:1.5px;color:var(--accent);text-shadow:0 0 12px var(--glow)}
+#hud .sub{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5}
+#hud .stats{display:flex;gap:10px;margin-top:10px;font-size:11px}
+#hud .stats b{color:var(--accent2)}
+#search{width:100%;margin-top:10px;background:#0a0d16;border:1px solid var(--rule);color:var(--ink);padding:7px 10px;border-radius:6px;font-family:inherit;font-size:12px;outline:none}
+#search:focus{border-color:var(--accent)}
+#filters{margin-top:10px;display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-size:10px;padding:3px 8px;border:1px solid var(--rule);border-radius:99px;cursor:pointer;background:transparent;color:var(--muted);transition:.15s}
+.chip.on{color:#fff;border-color:transparent}
+#legend{position:absolute;bottom:14px;left:14px;z-index:10;background:rgba(11,14,22,.85);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;font-size:10px;max-width:260px;backdrop-filter:blur(6px)}
+#legend div{display:flex;align-items:center;gap:8px;margin:3px 0;color:var(--muted)}
+#legend i{width:9px;height:9px;border-radius:50%;display:inline-block;box-shadow:0 0 6px currentColor}
+#legend b{color:var(--ink);font-weight:500}
+#help{position:absolute;bottom:14px;right:14px;z-index:10;background:rgba(11,14,22,.85);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;font-size:10px;color:var(--muted);backdrop-filter:blur(6px)}
+/* inspector */
+#inspector{position:absolute;top:14px;right:14px;z-index:10;background:rgba(11,14,22,.92);border:1px solid var(--accent);border-radius:10px;padding:16px;width:340px;max-height:80vh;overflow-y:auto;display:none;backdrop-filter:blur(8px);box-shadow:0 0 30px var(--glow)}
+#inspector.open{display:block}
+#inspector .close{position:absolute;top:8px;right:10px;cursor:pointer;color:var(--muted);font-size:16px;border:none;background:none}
+#inspector h2{font-size:14px;color:var(--accent);letter-spacing:.5px;margin-bottom:4px;word-break:break-all}
+#inspector .role{font-size:11px;color:var(--accent2);margin-bottom:8px}
+#inspector .note{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:8px}
+#inspector h3{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:10px 0 4px}
+#inspector ul{list-style:none}
+#inspector li{font-size:11px;padding:3px 6px;background:#0a0d16;border:1px solid var(--rule);border-radius:4px;margin:3px 0;word-break:break-all;color:var(--ink)}
+#inspector .key{color:var(--accent2)}
+#inspector .zone-tag{display:inline-block;font-size:9px;padding:2px 7px;border-radius:99px;margin-top:4px;color:#fff}
+#inspector .links{font-size:10px;color:var(--muted)}
+#noresults{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9;font-size:13px;color:var(--muted);display:none;background:rgba(11,14,22,.9);padding:14px 20px;border:1px solid var(--rule);border-radius:10px}
+@media(max-width:700px){#hud{max-width:230px;padding:10px 12px}#hud h1{font-size:12px}#inspector{width:calc(100vw - 28px);left:14px;right:14px;top:auto;bottom:14px;max-height:45vh}#help{display:none}}
+  .tabs{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:30;display:flex;gap:4px;background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:4px;max-width:96vw;overflow-x:auto}
+  .tabs a{color:var(--muted);text-decoration:none;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:7px 14px;border-radius:4px;white-space:nowrap}
+  .tabs a.active{color:var(--accent);background:rgba(0,229,255,.08);border:1px solid var(--rule)}
+  .tabs a:hover{color:var(--ink)}
+  @media (max-width:768px){.tabs{top:8px;padding:3px;gap:2px}.tabs a{font-size:8.5px;letter-spacing:1.5px;padding:6px 10px}}
+</style>
+</head>
+<body>
+<div class="tabs">
+  <a href="https://saviorsec.github.io/axon-network/">⌂ Internal</a>
+  <a href="https://saviorsec.github.io/axon-galaxy/" class="active">Galaxy 2D</a>
+  <a href="https://saviorsec.github.io/axon-globe/">Globe 3D</a>
+  <a href="https://saviorsec.github.io/axon-communities/usmap.html">US Map</a>
+  <a href="https://saviorsec.github.io/axon-communities/">Communities</a>
+</div>
+
+<div id="app">
+<canvas id="galaxy"></canvas>
+<div id="hud">
+  <h1>⦿ RESEARCH GALAXY</h1>
+  <div class="sub">Axon Enterprise ecosystem — passive OSINT (DNS + CT + frontend)</div>
+  <div class="stats"><span><b id="st-z">0</b> planets</span><span><b id="st-s">0</b> nodes</span><span><b id="st-l">0</b> links</span></div>
+  <input id="search" placeholder="search hosts, keys, findings…" autocomplete="off">
+  <div id="filters"></div>
+</div>
+<div id="inspector"><button class="close" onclick="closeInspector()">✕</button><div id="inspector-body"></div></div>
+<div id="legend"></div>
+<div id="help">drag · wheel zoom · click node · search/filter above</div>
+<div id="noresults">no matches in view</div>
+</div>
+
+<script>
+const ARCHIVE = {
+ "zones": [
+  {
+   "id": "z-tv",
+   "name": "DEVICE // WEBOS TV + HOME",
+   "color": "#ff5c5c",
+   "note": "Retail LG OLED (G5 tested, 2026-09 investigation): ACR sampling, voice/audio capture in standby, LAN+broadcast device discovery, Wi-Fi surroundings mapping."
+  },
+  {
+   "id": "z-sdp",
+   "name": "SDP // LG SERVICE-DATA CLOUD",
+   "color": "#3aa0ff",
+   "note": "lgtvsdp.com (reg 2010). Region ingest instances behind Amazon aws-prd.net hosted zones on AWS us-west-2 / ap-northeast-2. Reported landing point for TV telemetry incl. buffered audio after reconnect."
+  },
+  {
+   "id": "z-common",
+   "name": "DATA PLANE // LGTVCCOMMON.COM",
+   "color": "#00e5ff",
+   "note": "AWS (Route53). CDP beacon/service family, usage-pattern-profile, adlib/adts/videoads, channel/channel2 (AWS Seoul), netflixvoice, wise* admin/config. Two hosts leak RFC1918 10.154.x.x via public DNS."
+  },
+  {
+   "id": "z-appstv",
+   "name": "CONTENT // LGAPPSTV.COM",
+   "color": "#39d98a",
+   "note": "App/content/shopping estate (reg 2011). lgrecommends, lgshoplog/lgshopsvc, vodstreaming, shoptime. us.lgappstv.com hosts the Smart TV legal/privacy portal."
+  },
+  {
+   "id": "z-acr",
+   "name": "ACR // GRACENOTE + ALPHONSO",
+   "color": "#c084fc",
+   "note": "Viewing Information / Live Plus ACR. Gracenote (LG-owned) content fingerprinting. TV Viewing Information agreement names Alphonso Inc as LG service partner with access to what you watch across apps and play activity."
+  },
+  {
+   "id": "z-ads",
+   "name": "AD-TECH // LG AD SOLUTIONS",
+   "color": "#ff9f43",
+   "note": "lgads.tv (WP Engine site; AWS us-east-1 envs), alphonso.tv origin estate (AAS campaigns, SSAI, tvos-voice-gateway, segments/insights, webproxy on Turnkey AS40244), lgsmartad.com (ad.lgsmartad.com on LG CNS AS4668 KR). LG acquired Alphonso 2021."
+  },
+  {
+   "id": "z-partners",
+   "name": "PARTNERS // THIRD PARTIES",
+   "color": "#ffd166",
+   "note": "Named/integration partners and privacy-policy categories: voice assistants, content providers, ad partners, business & marketing partners, and inbound third-party data providers."
+  },
+  {
+   "id": "z-exit",
+   "name": "LAST STOP // SALE + BROKERS",
+   "color": "#ff3d81",
+   "note": "LG CCPA/CPRA disclosure: may sell or share categories of Personal Information with advertising partners or business & marketing partners. LG Ad Solutions: combines data with third-party data providers; product is addressable audiences for advertisers - the exit to the data-broker/ad ecosystem."
+  }
+ ],
+ "services": [
+  {
+   "id": "s-tv-webos",
+   "name": "webOS TV (LG OLED G5 etc.)",
+   "zone": "z-tv",
+   "role": "DEVICE - 49M US webOS sets (LG Ads fact sheet); ~216M TVs sold globally",
+   "note": "Runs ACR, voice recognition, app store, LG Channels, network discovery. Investigation: network listeners broad out of the box; no hardware mic kill switch. Privacy settings on-device (Settings > Privacy & Terms).",
+   "endpoints": [
+    "on-device webOS (luna/palm services, developer mode documented by LG webOS dev portal)"
+   ],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-tv-scan",
+   "name": "LAN + broadcast discovery",
+   "zone": "z-tv",
+   "role": "DEVICE BEHAVIOR - maps non-LG devices",
+   "note": "Reported: scans LAN for phones/smartwatches/PCs/printers/switches/smart-home; collects internal IPs, neighbouring Wi-Fi SSIDs + signal + location. Feeds the 'addressable secondary devices' pool (363-386M US) used for ad targeting.",
+   "endpoints": [],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-tv-audio",
+   "name": "Standby mic audio capture",
+   "zone": "z-tv",
+   "role": "DEVICE BEHAVIOR - investigation claim",
+   "note": "Reported: clean mic audio captured while screen off; buffered locally while offline; uploaded to LG servers after network restored. LG: voice data only with consent; no comment on investigation as of 2026-09-09.",
+   "endpoints": [],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-tv-acr",
+   "name": "ACR sampling (all inputs)",
+   "zone": "z-tv",
+   "role": "DEVICE BEHAVIOR - viewing fingerprinting",
+   "note": "Fingerprints on-screen audio/video across HDMI/streaming inputs for content identification. Consent surfaces: 'Viewing Information' / 'Live Plus'. Data accessible to LG and service partner Alphonso Inc per the TV agreement.",
+   "endpoints": [],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-sdp-root",
+   "name": "lgtvsdp.com (SDP root)",
+   "zone": "z-sdp",
+   "role": "SERVICE-DATA PLATFORM",
+   "note": "Registered 2010-09-27 (predates webOS TVs). Telemetry/service-data destination family. Alias records into Amazon aws-prd.net zone.",
+   "endpoints": [],
+   "dns": [
+    "NS secns.lg.co.kr",
+    "NS prmns.lg.co.kr"
+   ],
+   "keys": []
+  },
+  {
+   "id": "s-sdp-aic",
+   "name": "aic-iotv.lgtvsdp.com",
+   "zone": "z-sdp",
+   "role": "REGION INGEST (us-west-2)",
+   "note": "CNAME aic-iotv-lgtvsdp-com.aws-prd.net. AWS us-west-2 (Boardman OR).",
+   "endpoints": [],
+   "dns": [
+    "52.27.197.56",
+    "35.81.237.210"
+   ],
+   "keys": []
+  },
+  {
+   "id": "s-sdp-kic",
+   "name": "kic-iotv.lgtvsdp.com",
+   "zone": "z-sdp",
+   "role": "REGION INGEST (ap-northeast-2)",
+   "note": "CNAME kic-iotv-lgtvsdp-com.aws-prd.net. AWS ap-northeast-2 (Seoul/Incheon).",
+   "endpoints": [],
+   "dns": [
+    "54.116.204.19",
+    "54.116.244.83"
+   ],
+   "keys": []
+  },
+  {
+   "id": "s-cdp",
+   "name": "CDP beacon/service family",
+   "zone": "z-common",
+   "role": "CUSTOMER-DATA PLATFORM",
+   "note": "cdpbeacon/cdpbeacon2 (beacons), cdpes/cdplauncher/cdpsvc (services). Wildcard-certified under lgtvcommon.com. Likely beacon ingest for usage/event data.",
+   "endpoints": [
+    "cdpbeacon.lgtvcommon.com",
+    "cdpbeacon2.lgtvcommon.com",
+    "cdpes.lgtvcommon.com"
+   ],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-usage",
+   "name": "usage-pattern-profile",
+   "zone": "z-common",
+   "role": "USAGE PROFILING",
+   "note": "ruc.usage-pattern-profile + www.ruc. (ruc = regional?). Profile of viewing/usage patterns.",
+   "endpoints": [
+    "usage-pattern-profile.lgtvcommon.com"
+   ],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-adsvc",
+   "name": "adlib / adts / ads / videoads",
+   "zone": "z-common",
+   "role": "AD SERVICES",
+   "note": "adts (ad targeting svc) + lgcap resolve to RFC1918 10.154.x.x via public DNS (split-horizon leak, internal topology visible).",
+   "endpoints": [
+    "adlib.lgtvcommon.com",
+    "adts.lgtvcommon.com",
+    "videoads.lgtvcommon.com",
+    "lgcap.lgtvcommon.com"
+   ],
+   "dns": [
+    "10.154.23.111",
+    "10.154.17.177",
+    "10.154.4.240"
+   ],
+   "keys": []
+  },
+  {
+   "id": "s-channels",
+   "name": "channel / channel2 (LG Channels)",
+   "zone": "z-common",
+   "role": "FAST CHANNELS API",
+   "note": "AWS ap-northeast-2 (Seoul). LG Channels FAST ad-supported streaming backend.",
+   "endpoints": [
+    "channel.lgtvcommon.com",
+    "channel2.lgtvcommon.com"
+   ],
+   "dns": [
+    "52.78.40.202",
+    "3.37.7.172",
+    "3.38.65.89",
+    "13.124.94.184"
+   ],
+   "keys": []
+  },
+  {
+   "id": "s-nvoice",
+   "name": "netflixvoice.lgtvcommon.com",
+   "zone": "z-common",
+   "role": "VOICE SEARCH INTEGRATION (NETFLIX)",
+   "note": "Voice search bridge toward Netflix; evidence of TV voice pipeline talking to content partners.",
+   "endpoints": [
+    "netflixvoice.lgtvcommon.com"
+   ],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-wise",
+   "name": "wise* config/service stack",
+   "zone": "z-common",
+   "role": "CONFIG + TELEMETRY",
+   "note": "wiseconfig/wiseservice/wiseresource/wiseadmin + wau/lsw. Management/update-side estate of the data plane.",
+   "endpoints": [
+    "wiseconfig.lgtvcommon.com",
+    "wiseservice.lgtvcommon.com",
+    "wiseadmin.lgtvcommon.com"
+   ],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-appstv",
+   "name": "lgappstv.com (app/content)",
+   "zone": "z-appstv",
+   "role": "APP STORE + CONTENT",
+   "note": "Registered 2011-02-18. lgrecommends (recommendations), lgshoplog/lgshopsvc (shopping), vodstreaming, shoptime, accessusb.",
+   "endpoints": [
+    "lgrecommends.lgappstv.com",
+    "lgshoplog.lgappstv.com",
+    "vodstreaming.lgappstv.com"
+   ],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-tvterms",
+   "name": "us.lgappstv.com/main/terms",
+   "zone": "z-appstv",
+   "role": "SMART TV PRIVACY PORTAL",
+   "note": "LG US Privacy Policy directs Smart TV / LG Channels users to the separate Smart TV Privacy Policy here. Consent + opt-out surfaces for TV data collection.",
+   "endpoints": [
+    "https://us.lgappstv.com/main/terms"
+   ],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-alphonso",
+   "name": "Alphonso Inc (Viewing Information partner)",
+   "zone": "z-acr",
+   "role": "ACR SERVICE PARTNER",
+   "note": "TV Viewing Information agreement grants LG and service partner Alphonso Inc access to watched content across streaming services + play activity (pocket-lint 2026-05). LG acquired Alphonso 2021 -> LG Ad Solutions.",
+   "endpoints": [],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-gracenote",
+   "name": "Gracenote (LG-owned)",
+   "zone": "z-acr",
+   "role": "ACR + CONTENT METADATA",
+   "note": "91 CT names; k8s prod/nonprod zones under .cloud/.compute.gracenote.com; video ACR family incl. gvdnavigator (amzf/apple/fb/bfin partner certs), advanceddiscoverysuite, onconnect.video. Fingerprint reference + metadata backend.",
+   "endpoints": [
+    "gvdnavigator.gracenote.com",
+    "advanceddiscovery.video.gracenote.com",
+    "onconnect.video.gracenote.com"
+   ],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-lgads",
+   "name": "lgads.tv (LG Ad Solutions)",
+   "zone": "z-ads",
+   "role": "AD SOLUTIONS HQ/SITE",
+   "note": "Marketing site on WP Engine (141.193.213.10/11). Env estate on AWS us-east-1 (dev/staging/test/prod.useast1.aws.lgads.tv). Fact sheet (contact-gated): 49M US webOS TVs, 363M addressable secondary devices.",
+   "endpoints": [
+    "lgads.tv",
+    "1pscim.lgads.tv",
+    "tvlabs.lgads.tv"
+   ],
+   "dns": [
+    "141.193.213.10",
+    "141.193.213.11"
+   ],
+   "keys": []
+  },
+  {
+   "id": "s-aas",
+   "name": "alphonso.tv AAS estate",
+   "zone": "z-ads",
+   "role": "AD SERVING + SSAI",
+   "note": "cdn-aas-campaigns (campaign CDN), cdn-aas-ssai (server-side ad insertion), cdn-tvos, cdn-insights.",
+   "endpoints": [
+    "cdn-aas-campaigns.alphonso.tv",
+    "cdn-aas-ssai.alphonso.tv",
+    "cdn-tvos.alphonso.tv"
+   ],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-segments",
+   "name": "segments / insights / voice-gw",
+   "zone": "z-ads",
+   "role": "AUDIENCE SEGMENTS",
+   "note": "segments.alphonso.tv, insights, tvos-voice-gateway (voice ad gateway), api.alphonso.tv -> webproxy.alphonso.tv (Turnkey AS40244 209.240.97.236).",
+   "endpoints": [
+    "segments.alphonso.tv",
+    "tvos-voice-gateway.alphonso.tv",
+    "api.alphonso.tv"
+   ],
+   "dns": [
+    "209.240.97.236"
+   ],
+   "keys": []
+  },
+  {
+   "id": "s-smartad",
+   "name": "lgsmartad.com",
+   "zone": "z-ads",
+   "role": "LEGACY LG SMART AD",
+   "note": "Registered 2012-06-25. ad.lgsmartad.com -> 203.247.138.53 on LG CNS AS4668 (Seoul) - LG-owned Korean hosting. adlib/info subdomains, info via aws-prd.net CNAME.",
+   "endpoints": [
+    "ad.lgsmartad.com",
+    "adlib.lgsmartad.com"
+   ],
+   "dns": [
+    "203.247.138.53"
+   ],
+   "keys": []
+  },
+  {
+   "id": "s-netflix",
+   "name": "Netflix",
+   "zone": "z-partners",
+   "role": "CONTENT PARTNER",
+   "note": "netflixvoice.lgtvcommon.com bridge; Netflix app + voice search on webOS. Standard smart-TV app partner.",
+   "endpoints": [],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-google",
+   "name": "Google (Assistant / ads)",
+   "zone": "z-partners",
+   "role": "VOICE + AD PARTNER",
+   "note": "Google Assistant on LG TVs (voice); Google ad-tech appears via LG privacy 'third-party advertising partners' interest-based ads language.",
+   "endpoints": [],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-amazon",
+   "name": "Amazon (Alexa)",
+   "zone": "z-partners",
+   "role": "VOICE PARTNER",
+   "note": "Alexa built-in on LG TVs; voice requests route to Amazon when enabled.",
+   "endpoints": [],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-dataprov",
+   "name": "Third-party data providers",
+   "zone": "z-partners",
+   "role": "INBOUND ENRICHMENT",
+   "note": "LG Ad Solutions privacy policy: receives demographic/interests etc. from third-party data providers and combines with own data. LG Global privacy: collects from marketing companies and data brokers.",
+   "endpoints": [],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-adpartners",
+   "name": "Advertising partners",
+   "zone": "z-partners",
+   "role": "RECIPIENT CATEGORY (CCPA)",
+   "note": "LG US disclosure: may sell/share PI categories with advertising partners for interest-based advertising across online services.",
+   "endpoints": [],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-bizpartners",
+   "name": "Business & marketing partners",
+   "zone": "z-partners",
+   "role": "RECIPIENT CATEGORY (CCPA)",
+   "note": "LG US disclosure: business/marketing partners recipient category for sold/shared data.",
+   "endpoints": [],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-sale",
+   "name": "SALE - what LG says it sells/shares",
+   "zone": "z-exit",
+   "role": "CCPA/CPRA DISCLOSURE",
+   "note": "'We may sell or share the following categories of Personal Information with advertising partners or with our business and marketing partners: contact data; demographic; profile data; communications data (excluding contents of communications); transactional data; marketing data; user-generated content; relationship data; financial data; promotion data.' (privacy.us.lg.com)",
+   "endpoints": [
+    "https://privacy.us.lg.com/policies"
+   ],
+   "dns": [],
+   "keys": []
+  },
+  {
+   "id": "s-brokers",
+   "name": "Data brokers / ad ecosystem",
+   "zone": "z-exit",
+   "role": "LAST STOP BEFORE + AFTER SALE",
+   "note": "LG Global privacy acknowledges collecting from data brokers (inbound). The outbound product is addressable audiences + ACR viewing graphs sold into CTV ad ecosystem; brokers/resellers are the terminal. GPC/opt-out + 'Do Not Sell or Share My Personal Information' available.",
+   "endpoints": [],
+   "dns": [],
+   "keys": []
+  }
+ ],
+ "links": [
+  [
+   "s-tv-webos",
+   "s-tv-acr"
+  ],
+  [
+   "s-tv-webos",
+   "s-tv-audio"
+  ],
+  [
+   "s-tv-webos",
+   "s-tv-scan"
+  ],
+  [
+   "s-tv-audio",
+   "s-sdp-root"
+  ],
+  [
+   "s-tv-acr",
+   "s-sdp-root"
+  ],
+  [
+   "s-sdp-root",
+   "s-sdp-aic"
+  ],
+  [
+   "s-sdp-root",
+   "s-sdp-kic"
+  ],
+  [
+   "s-sdp-aic",
+   "s-cdp"
+  ],
+  [
+   "s-sdp-kic",
+   "s-cdp"
+  ],
+  [
+   "s-tv-webos",
+   "s-cdp"
+  ],
+  [
+   "s-tv-webos",
+   "s-usage"
+  ],
+  [
+   "s-tv-webos",
+   "s-channels"
+  ],
+  [
+   "s-tv-webos",
+   "s-nvoice"
+  ],
+  [
+   "s-nvoice",
+   "s-netflix"
+  ],
+  [
+   "s-tv-webos",
+   "s-adsvc"
+  ],
+  [
+   "s-tv-webos",
+   "s-appstv"
+  ],
+  [
+   "s-tv-webos",
+   "s-tvterms"
+  ],
+  [
+   "s-tv-scan",
+   "s-alphonso"
+  ],
+  [
+   "s-tv-acr",
+   "s-alphonso"
+  ],
+  [
+   "s-tv-acr",
+   "s-gracenote"
+  ],
+  [
+   "s-gracenote",
+   "s-alphonso"
+  ],
+  [
+   "s-alphonso",
+   "s-lgads"
+  ],
+  [
+   "s-alphonso",
+   "s-aas"
+  ],
+  [
+   "s-alphonso",
+   "s-segments"
+  ],
+  [
+   "s-cdp",
+   "s-usage"
+  ],
+  [
+   "s-cdp",
+   "s-adsvc"
+  ],
+  [
+   "s-usage",
+   "s-adsvc"
+  ],
+  [
+   "s-dataprov",
+   "s-segments"
+  ],
+  [
+   "s-google",
+   "s-tv-webos"
+  ],
+  [
+   "s-amazon",
+   "s-tv-webos"
+  ],
+  [
+   "s-netflix",
+   "s-tv-webos"
+  ],
+  [
+   "s-adsvc",
+   "s-adpartners"
+  ],
+  [
+   "s-channels",
+   "s-adpartners"
+  ],
+  [
+   "s-aas",
+   "s-adpartners"
+  ],
+  [
+   "s-adpartners",
+   "s-sale"
+  ],
+  [
+   "s-bizpartners",
+   "s-sale"
+  ],
+  [
+   "s-sale",
+   "s-brokers"
+  ],
+  [
+   "s-google",
+   "s-adpartners"
+  ]
+ ]
+}
+
+const state = { panX:0, panY:0, scale:1, drag:null, sel:null, activeZones:new Set(), query:"" };
+const W = () => window.innerWidth, H = () => window.innerHeight;
+
+// ---------- layout: planets on circle, services orbit ----------
+const zones = ARCHIVE.zones, services = ARCHIVE.services;
+const links = ARCHIVE.links.map(l => l.length===2 ? {a:l[0], b:l[1]} : {a:l[0], b:l[1]});
+const linksBy = {};
+links.forEach((l,i)=>{ (linksBy[l.a]=linksBy[l.a]||[]).push(i); (linksBy[l.b]=linksBy[l.b]||[]).push(i); });
+
+// positions
+const pos = {}; // id -> {x,y,r,type}
+zones.forEach((z,i)=>{
+  const a = (i/zones.length)*Math.PI*2 - Math.PI/2;
+  pos[z.id] = { x: Math.cos(a)*260, y: Math.sin(a)*260, r: 30, type:"zone", zone:z };
+});
+services.forEach((s,i)=>{
+  const z = zones.findIndex(z=>z.id===s.zone);
+  const a = (i*2.399963 + z*1.7) % (Math.PI*2);
+  const dist = 105 + (i%5)*12;
+  const cx = pos[s.zone].x, cy = pos[s.zone].y;
+  pos[s.id] = { x: cx + Math.cos(a)*dist, y: cy + Math.sin(a)*dist, r: 7, type:"service", svc:s };
+});
+
+// ---------- render ----------
+const cv = document.getElementById("galaxy"), ctx = cv.getContext("2d");
+let t = 0;
+function resize(){ cv.width = W()*devicePixelRatio; cv.height = H()*devicePixelRatio; cv.style.width=W()+"px"; cv.style.height=H()+"px"; ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); }
+resize(); window.addEventListener("resize", resize);
+
+function visible(id){
+  if (state.query){
+    const e = pos[id]; const text = (e.type==="zone" ? e.zone.name+" "+e.zone.note : e.svc.name+" "+e.svc.role+" "+e.svc.note+" "+e.svc.keys.join(" ")).toLowerCase();
+    return text.includes(state.query);
+  }
+  if (state.activeZones.size===0) return true;
+  const e = pos[id];
+  if (e.type==="zone") return state.activeZones.has(id);
+  return state.activeZones.has(e.svc.zone);
+}
+
+function draw(){
+  ctx.fillStyle = "#05060a";
+  ctx.fillRect(0,0,W(),H());
+  const cx = W()/2 + state.panX, cy = H()/2 + state.panY, sc = state.scale;
+  // stars
+  for (let i=0;i<120;i++){
+    const sx = (i*97.3)%W(), sy=(i*61.7)%H();
+    ctx.fillStyle = `rgba(255,255,255,${0.05+((i*13)%10)/40})`;
+    ctx.fillRect(sx,sy,1.2,1.2);
+  }
+  ctx.save(); ctx.translate(cx,cy); ctx.scale(sc,sc);
+
+  // links
+  ctx.lineWidth = 0.7/sc;
+  links.forEach(l=>{
+    const pa=pos[l.a], pb=pos[l.b]; if(!pa||!pb) return;
+    if(!visible(l.a)||!visible(l.b)) return;
+    const g = ctx.createLinearGradient(pa.x,pa.y,pb.x,pb.y);
+    const ca = pa.type==="zone"?pa.zone.color:"#33415e";
+    const cb = pb.type==="zone"?pb.zone.color:"#33415e";
+    g.addColorStop(0,ca); g.addColorStop(1,cb);
+    ctx.strokeStyle = g; ctx.globalAlpha = 0.28;
+    ctx.beginPath(); ctx.moveTo(pa.x,pa.y); ctx.lineTo(pb.x,pb.y); ctx.stroke();
+    ctx.globalAlpha = 1;
+  });
+
+  // zones
+  zones.forEach(z=>{
+    const p = pos[z.id]; if(!visible(z.id)) return;
+    const pulse = 1 + Math.sin(t/900 + p.x)*0.05;
+    const r = p.r*pulse;
+    const grad = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r*3);
+    grad.addColorStop(0, z.color+"44"); grad.addColorStop(1,"transparent");
+    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(p.x,p.y,r*3,0,7); ctx.fill();
+    ctx.fillStyle = z.color+"22"; ctx.beginPath(); ctx.arc(p.x,p.y,r*1.6,0,7); ctx.fill();
+    ctx.strokeStyle = z.color; ctx.lineWidth = 1.6/sc; ctx.shadowColor=z.color; ctx.shadowBlur=14;
+    ctx.beginPath(); ctx.arc(p.x,p.y,r,0,7); ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle = z.color; ctx.beginPath(); ctx.arc(p.x,p.y,4,0,7); ctx.fill();
+    ctx.font = `${11/sc}px ui-monospace,monospace`; ctx.textAlign="center";
+    ctx.fillStyle = "#e8eeff"; ctx.shadowColor=z.color; ctx.shadowBlur=8;
+    ctx.fillText(z.name.split("//")[1]||z.name, p.x, p.y+r+16/sc);
+    ctx.shadowBlur=0;
+  });
+
+  // services
+  services.forEach(s=>{
+    const p = pos[s.id]; if(!visible(s.id)) return;
+    const zc = zones.find(z=>z.id===s.zone).color;
+    const hot = s.keys && s.keys.length>1;
+    ctx.fillStyle = hot ? zc : "#3b4a6b";
+    ctx.shadowColor = hot?zc:"transparent"; ctx.shadowBlur = hot?10:0;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.strokeStyle = hot?zc:"#55648c"; ctx.lineWidth=0.8/sc;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.stroke();
+    ctx.font = `${8.5/sc}px ui-monospace,monospace`; ctx.textAlign="left";
+    ctx.fillStyle = "#9fb0d6";
+    let label = s.name.length>30 ? s.name.slice(0,29)+"…" : s.name;
+    ctx.fillText(label, p.x+p.r+5, p.y+3);
+  });
+
+  ctx.restore();
+  requestAnimationFrame(draw);
+}
+draw();
+setInterval(()=>{t=Date.now()}, 100);
+
+// ---------- interaction ----------
+function toWorld(ev){
+  const r = cv.getBoundingClientRect();
+  return { x:(ev.clientX-r.left - W()/2 - state.panX)/state.scale, y:(ev.clientY-r.top - H()/2 - state.panY)/state.scale };
+}
+cv.addEventListener("mousedown",e=>{ state.drag={x:e.clientX,y:e.clientY,px:state.panX,py:state.panY}; cv.classList.add("drag"); });
+window.addEventListener("mousemove",e=>{ if(state.drag){ state.panX=state.drag.px+e.clientX-state.drag.x; state.panY=state.drag.py+e.clientY-state.drag.y; } });
+window.addEventListener("mouseup",e=>{ if(state.drag){ const moved=Math.abs(e.clientX-state.drag.x)+Math.abs(e.clientY-state.drag.y); if(moved<5){ const w=toWorld(e); pick(w.x,w.y); } state.drag=null; cv.classList.remove("drag"); } });
+cv.addEventListener("wheel",e=>{ e.preventDefault(); const f=e.deltaY>0?0.9:1.1; state.scale=Math.min(3,Math.max(0.35,state.scale*f)); },{passive:false});
+cv.addEventListener("touchstart",e=>{ const t=e.touches[0]; state.drag={x:t.clientX,y:t.clientY,px:state.panX,py:state.panY}; },{passive:true});
+cv.addEventListener("touchmove",e=>{ if(!state.drag)return; e.preventDefault(); const t=e.touches[0]; state.panX=state.drag.px+t.clientX-state.drag.x; state.panY=state.drag.py+t.clientY-state.drag.y; },{passive:false});
+
+function pick(wx,wy){
+  let best=null, bd=1e9;
+  [...zones.map(z=>z.id), ...services.map(s=>s.id)].forEach(id=>{
+    const p=pos[id]; if(!visible(id)) return;
+    const d=Math.hypot(wx-p.x,wy-p.y);
+    if(d<p.r+8 && d<bd){bd=d;best=id;}
+  });
+  if(best) inspect(best); else closeInspector();
+}
+
+function inspect(id){
+  state.sel=id; const e=pos[id];
+  const b=document.getElementById("inspector-body");
+  const zc = e.type==="zone" ? e.zone : zones.find(z=>z.id===e.svc.zone);
+  let html="";
+  if(e.type==="zone"){
+    const z=e.zone;
+    const members = services.filter(s=>s.zone===z.id);
+    html+=`<h2>⦿ ${z.name}</h2><span class="zone-tag" style="background:${z.color}">PLANET</span>`;
+    html+=`<div class="role">${members.length} nodes</div><div class="note">${z.note}</div>`;
+    html+=`<h3>nodes</h3><ul>${members.map(s=>`<li onclick="inspect('${s.id}')" style="cursor:pointer">${s.name}</li>`).join("")}</ul>`;
+  } else {
+    const s=e.svc;
+    html+=`<h2>◈ ${s.name}</h2><span class="zone-tag" style="background:${zc.color}">${zc.name}</span>`;
+    html+=`<div class="role">${s.role}</div><div class="note">${s.note||""}</div>`;
+    if(s.endpoints&&s.endpoints.length){ html+=`<h3>endpoints</h3><ul>${s.endpoints.map(x=>`<li class="key">${x}</li>`).join("")}</ul>`; }
+    if(s.keys&&s.keys.length){ html+=`<h3>keys / creds</h3><ul>${s.keys.map(x=>`<li class="key">${x}</li>`).join("")}</ul>`; }
+    if(s.dns&&s.dns.length){ html+=`<h3>dns</h3><ul>${s.dns.map(x=>`<li>${x}</li>`).join("")}</ul>`; }
+    const neighborLinks = (linksBy[s.id]||[]).map(i=>links[i]);
+    const neighbors = neighborLinks.map(l=>{ const o=l.a===s.id?l.b:l.a; const p=pos[o]; return p? (p.type==="zone"?`<span style="color:${p.zone.color}">${p.zone.name}</span>`:p.svc.name) : ""; }).filter(Boolean);
+    if(neighbors.length){ html+=`<h3>links</h3><div class="links">${neighbors.join(" · ")}</div>`; }
+  }
+  b.innerHTML=html;
+  document.getElementById("inspector").classList.add("open");
+}
+function closeInspector(){ document.getElementById("inspector").classList.remove("open"); }
+
+// ---------- filters + search ----------
+const filterBox=document.getElementById("filters");
+zones.forEach(z=>{
+  const c=document.createElement("button");
+  c.className="chip"; c.textContent=z.name.split("//")[1]||z.name;
+  c.style.borderColor=z.color; c.style.color=z.color;
+  c.onclick=()=>{
+    if(state.activeZones.has(z.id)) state.activeZones.delete(z.id); else state.activeZones.add(z.id);
+    c.classList.toggle("on", state.activeZones.has(z.id));
+    if(state.activeZones.has(z.id)) c.style.background=z.color+"33";
+    else c.style.background="transparent";
+  };
+  filterBox.appendChild(c);
+});
+document.getElementById("search").addEventListener("input",e=>{
+  state.query=e.target.value.trim().toLowerCase();
+  document.getElementById("noresults").style.display = state.query && !Object.keys(pos).some(id=>visible(id)) ? "block":"none";
+});
+
+// legend
+const legend=document.getElementById("legend");
+legend.innerHTML = `<b style="color:var(--accent)">LEGEND</b>` + zones.map(z=>`<div><i style="color:${z.color};background:${z.color}"></i><span><b>${z.name}</b></span></div>`).join("") + `<div style="margin-top:6px;color:var(--muted)">◈ bright nodes = credentials/findings</div>`;
+
+// stats
+document.getElementById("st-z").textContent=zones.length;
+document.getElementById("st-s").textContent=services.length;
+document.getElementById("st-l").textContent=links.length;
+</script>
+
+<div id="pro-footer" style="position:absolute;top:auto;bottom:14px;left:50%;transform:translateX(-50%);z-index:8;background:rgba(11,14,22,.75);border:1px solid var(--rule);border-radius:99px;padding:5px 16px;font-size:10px;color:var(--muted);backdrop-filter:blur(6px);text-align:center;white-space:nowrap">
+  CHURCH OF MALWARE · LG GALAXY · 2026-09-09 · passive/public-artifact data · sources in repo docs/sources.md
+</div>
+</body>
+</html>
