@@ -497,6 +497,111 @@
    "dns": [],
    "keys": [],
    "cert": null
+  },
+  {
+   "id": "s-alph-cdn",
+   "name": "cdn*.alphonso.tv (Akamai)",
+   "zone": "z-ads",
+   "role": "CAMPAIGN + INSIGHTS CDN",
+   "note": "cdn.alphonso.tv / cdn-aas-campaigns / cdn-insights / content-partner -> Akamai edgesuite (AS20940). cdn-aas-ssai = server-side ad insertion CDN (wildcard cert).",
+   "endpoints": [
+    "cdn-aas-campaigns.alphonso.tv",
+    "cdn-insights.alphonso.tv",
+    "cdn-aas-ssai.alphonso.tv"
+   ],
+   "dns": [
+    "23.210.92.133",
+    "23.210.92.135",
+    "23.210.92.137",
+    "23.210.92.139",
+    "23.210.92.141",
+    "23.210.92.144",
+    "23.210.92.147"
+   ],
+   "keys": [],
+   "cert": null
+  },
+  {
+   "id": "s-alph-webproxy",
+   "name": "webproxy / segments / insights API",
+   "zone": "z-ads",
+   "role": "ALPHONSO API BACKEND",
+   "note": "segments.alphonso.tv + insights.alphonso.tv -> webproxy.alphonso.tv -> 209.240.97.236 (Turnkey Internet AS40244 NYC). Audience segments + insights backend.",
+   "endpoints": [
+    "segments.alphonso.tv",
+    "insights.alphonso.tv",
+    "api.alphonso.tv"
+   ],
+   "dns": [
+    "209.240.97.236"
+   ],
+   "keys": [],
+   "cert": null
+  },
+  {
+   "id": "s-alph-tvos",
+   "name": "tvos-voice-gateway.alphonso.tv",
+   "zone": "z-ads",
+   "role": "TVOS VOICE GATEWAY",
+   "note": "-> tvos-prod-lb.alphonso.tv -> 66.206.35.222 (Turnkey AS40244). Voice-ad gateway for connected-TV voice surfaces.",
+   "endpoints": [
+    "tvos-voice-gateway.alphonso.tv"
+   ],
+   "dns": [
+    "66.206.35.222"
+   ],
+   "keys": [],
+   "cert": null
+  },
+  {
+   "id": "s-alph-aws",
+   "name": "lgads.tv AWS env estate (us-east-1)",
+   "zone": "z-ads",
+   "role": "LG AD SOLUTIONS CLOUD",
+   "note": "*.dev/staging/test/prod.useast1.aws.lgads.tv + cdn-experience-studio / cdn-tvlabs on AWS us-east-1. Marketing site lgads.tv on WP Engine behind Cloudflare (141.193.213.x).",
+   "endpoints": [
+    "prod.useast1.aws.lgads.tv",
+    "lgads.tv"
+   ],
+   "dns": [
+    "141.193.213.10",
+    "141.193.213.11"
+   ],
+   "keys": [],
+   "cert": null
+  },
+  {
+   "id": "s-wurl",
+   "name": "Wurl (AppLovin)",
+   "zone": "z-buyers",
+   "role": "LG INVENTORY PIPE (NAMED IN SUIT)",
+   "note": "Alphonso v. LGE complaint: LGE cut side deals with Wurl + Amagi to sell LG ad inventory, breaching Alphonso's sole-seller exclusivity (AdExchanger 2026-01-27). AppLovin-owned CTV/FAST platform.",
+   "endpoints": [],
+   "dns": [],
+   "keys": [],
+   "cert": null
+  },
+  {
+   "id": "s-amagi",
+   "name": "Amagi",
+   "zone": "z-buyers",
+   "role": "LG INVENTORY PIPE (NAMED IN SUIT)",
+   "note": "Same complaint: LGE side deal with Amagi for LG inventory. Cloud-managed FAST/CTV platform.",
+   "endpoints": [],
+   "dns": [],
+   "keys": [],
+   "cert": null
+  },
+  {
+   "id": "s-zenith",
+   "name": "Zenith (LG subsidiary)",
+   "zone": "z-buyers",
+   "role": "LG AGENCY ARM (LITIGATION RECORD)",
+   "note": "Named in Sept 2025 amended Delaware suit by Alphonso co-founders (harm from board-takeover fight). LG's media/agency subsidiary.",
+   "endpoints": [],
+   "dns": [],
+   "keys": [],
+   "cert": null
   }
  ],
  "links": [
@@ -683,6 +788,54 @@
   [
    "s-advertisers",
    "s-sale"
+  ],
+  [
+   "s-lgads",
+   "s-alph-aws"
+  ],
+  [
+   "s-lgads-legal",
+   "s-alph-cdn"
+  ],
+  [
+   "s-lgads-legal",
+   "s-alph-webproxy"
+  ],
+  [
+   "s-lgads-legal",
+   "s-alph-tvos"
+  ],
+  [
+   "s-alph-cdn",
+   "s-aas"
+  ],
+  [
+   "s-alph-webproxy",
+   "s-segments"
+  ],
+  [
+   "s-channels",
+   "s-wurl"
+  ],
+  [
+   "s-channels",
+   "s-amagi"
+  ],
+  [
+   "s-wurl",
+   "s-advertisers"
+  ],
+  [
+   "s-amagi",
+   "s-advertisers"
+  ],
+  [
+   "s-lgads-legal",
+   "s-amazon-dsp"
+  ],
+  [
+   "s-zenith",
+   "s-advertisers"
   ]
  ],
  "ipPools": []
