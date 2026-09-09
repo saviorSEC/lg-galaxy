@@ -996,6 +996,66 @@
   [
    "s-zenith",
    "z-buyers"
+  ],
+  [
+   "z-tv",
+   "z-sdp"
+  ],
+  [
+   "z-tv",
+   "z-common"
+  ],
+  [
+   "z-sdp",
+   "z-common"
+  ],
+  [
+   "z-common",
+   "z-appstv"
+  ],
+  [
+   "z-tv",
+   "z-appstv"
+  ],
+  [
+   "z-common",
+   "z-acr"
+  ],
+  [
+   "z-tv",
+   "z-acr"
+  ],
+  [
+   "z-acr",
+   "z-ads"
+  ],
+  [
+   "z-common",
+   "z-ads"
+  ],
+  [
+   "z-ads",
+   "z-buyers"
+  ],
+  [
+   "z-buyers",
+   "z-exit"
+  ],
+  [
+   "z-ads",
+   "z-exit"
+  ],
+  [
+   "z-partners",
+   "z-tv"
+  ],
+  [
+   "z-partners",
+   "z-ads"
+  ],
+  [
+   "z-partners",
+   "z-exit"
   ]
  ],
  "ipPools": []
