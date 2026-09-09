@@ -29,11 +29,3 @@ and DOCUMENTED vs INFERRED confidence: github.com/saviorSEC/LG
 (private, docs/company-registry.md) — retained private for the eventual
 public disclosure writeup.
 
-## Boundary
-
-Passive OSINT / public artifacts only: cert-transparency logs, DNS,
-RDAP/registrations, LG and partner privacy policies, LG Ad Solutions
-press releases, regulator/litigation records, and public reporting
-(Gamers Nexus / Level1Techs investigation 2026-09-07). No active probing
-of LG or partner infrastructure. Credentials redacted; nothing here is
-from a non-public source.
